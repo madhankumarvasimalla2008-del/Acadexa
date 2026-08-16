@@ -1,109 +1,114 @@
-import { AppHeader } from "@/components/layout/app-header";
-import { FoundationForm } from "@/components/forms/foundation-form";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { requireSuperAdmin } from "@/lib/auth/workspace";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import {
-  assignSchoolMembershipAction,
-  createSchoolAction,
-} from "@/features/platform/actions";
 
-export default async function PlatformPage() {
-  const context = await requireSuperAdmin();
+function formatActivity(action: string, entityType: string, createdAt: string) {
+  const when = new Date(createdAt).toLocaleString();
+  return `${action.replaceAll("_", " ")} · ${entityType.replaceAll("_", " ")} · ${when}`;
+}
+
+export default async function PlatformDashboardPage() {
+  await requireSuperAdmin();
   const supabase = await createServerSupabaseClient();
-  const { data: schools } = await supabase
-    .from("schools")
-    .select("id, name, code, status")
-    .order("created_at", { ascending: false });
+
+  const [schools, activeSchools, suspendedSchools, admins, staff, activity] = await Promise.all([
+    supabase.from("schools").select("id", { count: "exact", head: true }),
+    supabase.from("schools").select("id", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("schools").select("id", { count: "exact", head: true }).eq("status", "suspended"),
+    supabase
+      .from("school_memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "school_admin"),
+    supabase
+      .from("school_memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "distribution_staff"),
+    supabase
+      .from("audit_logs")
+      .select("id, action, entity_type, created_at")
+      .order("created_at", { ascending: false })
+      .limit(8),
+  ]);
+
+  const cards = [
+    { label: "Schools", value: schools.count ?? 0 },
+    { label: "Active schools", value: activeSchools.count ?? 0 },
+    { label: "Suspended schools", value: suspendedSchools.count ?? 0 },
+    { label: "School admins", value: admins.count ?? 0 },
+    { label: "Distribution staff", value: staff.count ?? 0 },
+  ];
+
+  const logs = activity.data ?? [];
 
   return (
-    <>
-      <AppHeader context={context} />
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div>
-          <h1 className="text-2xl font-semibold">Platform</h1>
-          <p className="text-sm text-zinc-600">
-            Super Admin foundation only. No operational school dashboards here.
-          </p>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Platform</h1>
+        <p className="mt-1 text-sm text-zinc-600">
+          Super Admin overview. This is not an operational school dashboard.
+        </p>
+      </div>
+
+      <section aria-label="Overview">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          {cards.map((card) => (
+            <Card key={card.label}>
+              <CardHeader className="border-0 p-4 pb-0">
+                <CardDescription>{card.label}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 pt-2">
+                <p className="text-2xl font-semibold tabular-nums text-zinc-900">{card.value}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Schools</CardTitle>
-              <CardDescription>Tenant records. Isolation is by school_id + RLS.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-2 text-sm">
-                {(schools ?? []).length === 0 ? <li>No schools yet.</li> : null}
-                {(schools ?? []).map((school) => (
-                  <li key={school.id} className="rounded-md border border-zinc-200 p-3">
-                    <div className="font-medium">{school.name}</div>
-                    <div className="text-zinc-500">
-                      {school.code} · {school.status} · {school.id}
-                    </div>
+      </section>
+
+      <section aria-label="Quick actions">
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Create tenants and assign school-scoped roles.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button asChild size="sm">
+              <Link href="/platform/schools">Create school</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/platform/admins">Assign school admin</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/platform/audit">View audit</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section aria-label="Recent activity">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>
+              Platform audit events. Nothing is invented when the log is empty.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {logs.length === 0 ? (
+              <p className="text-sm text-zinc-500">No platform activity yet.</p>
+            ) : (
+              <ul className="divide-y divide-zinc-100 text-sm">
+                {logs.map((row) => (
+                  <li key={row.id} className="py-2 capitalize text-zinc-700">
+                    {formatActivity(row.action, row.entity_type, row.created_at)}
                   </li>
                 ))}
               </ul>
-              <FoundationForm action={createSchoolAction} submitLabel="Create school">
-                <div className="space-y-1">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" name="name" required />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="code">Code</Label>
-                  <Input id="code" name="code" required />
-                </div>
-              </FoundationForm>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Assign school role</CardTitle>
-              <CardDescription>
-                The user must already have an Acadexa account. Roles stay school-scoped.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FoundationForm action={assignSchoolMembershipAction} submitLabel="Assign">
-                <div className="space-y-1">
-                  <Label htmlFor="schoolId">School</Label>
-                  <select
-                    id="schoolId"
-                    name="schoolId"
-                    required
-                    className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
-                  >
-                    <option value="">Select…</option>
-                    {(schools ?? []).map((school) => (
-                      <option key={school.id} value={school.id}>
-                        {school.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="email">User email</Label>
-                  <Input id="email" name="email" type="email" required />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="role">Role</Label>
-                  <select
-                    id="role"
-                    name="role"
-                    required
-                    className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
-                  >
-                    <option value="school_admin">School Admin</option>
-                    <option value="distribution_staff">Distribution Staff</option>
-                  </select>
-                </div>
-              </FoundationForm>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+    </div>
   );
 }

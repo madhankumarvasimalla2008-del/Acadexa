@@ -32,6 +32,16 @@ export const membershipSchema = z.object({
   role: z.enum(["school_admin", "distribution_staff"]),
 });
 
+export const schoolStatusSchema = z.object({
+  schoolId: z.string().uuid(),
+  status: z.enum(["active", "suspended"]),
+});
+
+export const membershipIdSchema = z.object({
+  membershipId: z.string().uuid(),
+  schoolId: z.string().uuid(),
+});
+
 export const academicYearSchema = z.object({
   name: z.string().min(4).max(40),
   startsOn: z.string().min(10).max(10),

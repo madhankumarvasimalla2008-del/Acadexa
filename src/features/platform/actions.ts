@@ -4,8 +4,18 @@ import { revalidatePath } from "next/cache";
 import { writeAuditLog } from "@/lib/audit";
 import { requireSuperAdmin } from "@/lib/auth/workspace";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { membershipSchema, schoolCreateSchema } from "@/lib/validations/phase0";
+import { membershipSchema, schoolCreateSchema, schoolStatusSchema, membershipIdSchema } from "@/lib/validations/phase0";
 import type { ActionState } from "@/features/auth/actions";
+
+function revalidatePlatformPaths(schoolId?: string) {
+  revalidatePath("/platform");
+  revalidatePath("/platform/schools");
+  revalidatePath("/platform/admins");
+  revalidatePath("/platform/audit");
+  if (schoolId) {
+    revalidatePath(`/platform/schools/${schoolId}`);
+  }
+}
 
 export async function createSchoolAction(
   _prev: ActionState,
@@ -43,7 +53,7 @@ export async function createSchoolAction(
     metadata: { code: parsed.data.code },
   });
 
-  revalidatePath("/platform");
+  revalidatePlatformPaths(data.id);
   return { success: "School created." };
 }
 
@@ -101,6 +111,77 @@ export async function assignSchoolMembershipAction(
     metadata: { userId: profile.id, role: parsed.data.role },
   });
 
-  revalidatePath("/platform");
+  revalidatePlatformPaths(parsed.data.schoolId);
   return { success: "Membership assigned." };
+}
+
+export async function updateSchoolStatusAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireSuperAdmin();
+  const parsed = schoolStatusSchema.safeParse({
+    schoolId: formData.get("schoolId"),
+    status: formData.get("status"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid school status." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("schools")
+    .update({ status: parsed.data.status })
+    .eq("id", parsed.data.schoolId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await writeAuditLog({
+    schoolId: parsed.data.schoolId,
+    action: "school.status",
+    entityType: "schools",
+    entityId: parsed.data.schoolId,
+    metadata: { status: parsed.data.status },
+  });
+  revalidatePlatformPaths(parsed.data.schoolId);
+  return {
+    success:
+      parsed.data.status === "suspended" ? "School suspended." : "School set to active.",
+  };
+}
+
+export async function removeSchoolMembershipAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireSuperAdmin();
+  const parsed = membershipIdSchema.safeParse({
+    membershipId: formData.get("membershipId"),
+    schoolId: formData.get("schoolId"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid membership." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("school_memberships")
+    .delete()
+    .eq("id", parsed.data.membershipId)
+    .eq("school_id", parsed.data.schoolId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await writeAuditLog({
+    schoolId: parsed.data.schoolId,
+    action: "membership.remove",
+    entityType: "school_memberships",
+    entityId: parsed.data.membershipId,
+  });
+  revalidatePlatformPaths(parsed.data.schoolId);
+  return { success: "Membership removed." };
 }
