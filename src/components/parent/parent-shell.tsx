@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { logoutAction, setActiveStudentAction } from "@/features/auth/actions";
 import { Button } from "@/components/ui/button";
 import { ParentNav } from "@/components/parent/parent-nav";
+import { WorkspaceSwitcher } from "@/components/layout/workspace-switcher";
+import type { WorkspaceKind } from "@/types/auth";
 
 export type ParentChildOption = {
   id: string;
@@ -19,18 +21,14 @@ export function ParentShell({
   parentEmail,
   childrenList,
   activeStudentId,
-  showPlatform,
-  showSchool,
-  showDesk,
+  workspaces,
   children,
 }: {
   parentName: string;
   parentEmail: string | null;
   childrenList: ParentChildOption[];
   activeStudentId: string | null;
-  showPlatform: boolean;
-  showSchool: boolean;
-  showDesk: boolean;
+  workspaces: WorkspaceKind[];
   children: React.ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -81,30 +79,9 @@ export function ParentShell({
               <p className="truncate text-xs text-zinc-500">{parentEmail}</p>
             ) : null}
           </div>
-          {showPlatform ? (
-            <Link
-              href="/platform"
-              className="hidden text-sm text-zinc-600 hover:text-zinc-900 md:inline"
-            >
-              Platform
-            </Link>
-          ) : null}
-          {showSchool ? (
-            <Link
-              href="/school"
-              className="hidden text-sm text-zinc-600 hover:text-zinc-900 md:inline"
-            >
-              School
-            </Link>
-          ) : null}
-          {showDesk ? (
-            <Link
-              href="/desk"
-              className="hidden text-sm text-zinc-600 hover:text-zinc-900 md:inline"
-            >
-              Desk
-            </Link>
-          ) : null}
+          <div className="hidden lg:block">
+            <WorkspaceSwitcher workspaces={workspaces} />
+          </div>
           <form action={logoutAction}>
             <Button type="submit" variant="outline" size="sm">
               Logout
@@ -131,6 +108,13 @@ export function ParentShell({
             selectedStudentId={selectedId}
             onNavigate={() => setMenuOpen(false)}
           />
+          <div className="mt-6 lg:hidden">
+            <WorkspaceSwitcher
+              workspaces={workspaces}
+              variant="stack"
+              onNavigate={() => setMenuOpen(false)}
+            />
+          </div>
           {childrenList.length > 1 ? (
             <div className="mt-6">
               <p className="px-3 text-xs font-medium uppercase tracking-wide text-zinc-500">

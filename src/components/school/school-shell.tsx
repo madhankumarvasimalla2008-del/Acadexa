@@ -5,6 +5,8 @@ import Link from "next/link";
 import { logoutAction, setActiveSchoolAction } from "@/features/auth/actions";
 import { Button } from "@/components/ui/button";
 import { SchoolNav } from "@/components/school/school-nav";
+import { WorkspaceSwitcher } from "@/components/layout/workspace-switcher";
+import type { WorkspaceKind } from "@/types/auth";
 
 type SchoolOption = { id: string; name: string };
 
@@ -15,6 +17,7 @@ export function SchoolShell({
   adminEmail,
   activeSchoolId,
   schools,
+  workspaces,
   children,
 }: {
   schoolName: string;
@@ -23,6 +26,7 @@ export function SchoolShell({
   adminEmail: string | null;
   activeSchoolId: string;
   schools: SchoolOption[];
+  workspaces: WorkspaceKind[];
   children: React.ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,6 +69,9 @@ export function SchoolShell({
               <p className="truncate text-xs text-zinc-500">{adminEmail}</p>
             ) : null}
           </div>
+          <div className="hidden lg:block">
+            <WorkspaceSwitcher workspaces={workspaces} />
+          </div>
           {schools.length > 1
             ? schools.map((school) => (
                 <form key={school.id} action={setActiveSchoolAction.bind(null, school.id)}>
@@ -102,6 +109,13 @@ export function SchoolShell({
           }`}
         >
           <SchoolNav onNavigate={() => setMenuOpen(false)} />
+          <div className="mt-6 lg:hidden">
+            <WorkspaceSwitcher
+              workspaces={workspaces}
+              variant="stack"
+              onNavigate={() => setMenuOpen(false)}
+            />
+          </div>
         </aside>
         <main id="school-main" className="min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
           {children}

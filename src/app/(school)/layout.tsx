@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { requireSchoolAdmin } from "@/lib/auth/workspace";
+import { availableWorkspaces } from "@/lib/auth/workspaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { SchoolShell } from "@/components/school/school-shell";
 
@@ -40,6 +41,7 @@ export default async function SchoolLayout({
       adminEmail={context.email}
       activeSchoolId={schoolId}
       schools={schools}
+      workspaces={availableWorkspaces(context)}
     >
       {children}
     </SchoolShell>

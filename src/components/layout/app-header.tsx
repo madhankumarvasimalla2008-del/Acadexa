@@ -3,6 +3,8 @@ import { logoutAction } from "@/features/auth/actions";
 import { setActiveSchoolAction } from "@/features/auth/actions";
 import type { AuthContext } from "@/types/auth";
 import { Button } from "@/components/ui/button";
+import { WorkspaceSwitcher } from "@/components/layout/workspace-switcher";
+import { availableWorkspaces } from "@/lib/auth/workspaces";
 
 export function AppHeader({
   context,
@@ -19,6 +21,7 @@ export function AppHeader({
       ]),
     ).entries(),
   ];
+  const workspaces = availableWorkspaces(context);
 
   return (
     <header className="border-b border-zinc-200 bg-white">
@@ -30,26 +33,7 @@ export function AppHeader({
           <p className="text-xs text-zinc-500">Phase 0 foundation</p>
         </div>
         <nav className="flex flex-wrap items-center gap-2 text-sm">
-          {context.isSuperAdmin ? (
-            <Link className="rounded-md px-2 py-1 hover:bg-zinc-100" href="/platform">
-              Platform
-            </Link>
-          ) : null}
-          {context.memberships.some((m) => m.role === "school_admin") ? (
-            <Link className="rounded-md px-2 py-1 hover:bg-zinc-100" href="/school">
-              School
-            </Link>
-          ) : null}
-          {context.memberships.some((m) =>
-            ["school_admin", "distribution_staff"].includes(m.role),
-          ) ? (
-            <Link className="rounded-md px-2 py-1 hover:bg-zinc-100" href="/desk">
-              Desk
-            </Link>
-          ) : null}
-          <Link className="rounded-md px-2 py-1 hover:bg-zinc-100" href="/parent">
-            Parent
-          </Link>
+          <WorkspaceSwitcher workspaces={workspaces} />
           {schools.length > 1
             ? schools.map(([id, name]) => (
                 <form key={id} action={setActiveSchoolAction.bind(null, id)}>

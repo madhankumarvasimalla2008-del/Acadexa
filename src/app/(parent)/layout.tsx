@@ -4,6 +4,7 @@ import {
   getActiveStudentId,
   requireParentWorkspace,
 } from "@/lib/auth/workspace";
+import { availableWorkspaces } from "@/lib/auth/workspaces";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -43,11 +44,7 @@ export default async function ParentLayout({ children }: { children: ReactNode }
       parentEmail={context.email}
       childrenList={childrenList}
       activeStudentId={activeStudentId}
-      showPlatform={context.isSuperAdmin}
-      showSchool={context.memberships.some((membership) => membership.role === "school_admin")}
-      showDesk={context.memberships.some((membership) =>
-        ["school_admin", "distribution_staff"].includes(membership.role),
-      )}
+      workspaces={availableWorkspaces(context)}
     >
       {children}
     </ParentShell>
