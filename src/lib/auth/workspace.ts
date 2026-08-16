@@ -4,6 +4,7 @@ import type { AuthContext, SchoolRole } from "@/types/auth";
 import { requireAuth } from "@/lib/auth/session";
 
 export const ACTIVE_SCHOOL_COOKIE = "acadexa_active_school";
+export const ACTIVE_STUDENT_COOKIE = "acadexa_active_student";
 
 export async function getActiveSchoolId(context: AuthContext): Promise<string | null> {
   const cookieStore = await cookies();
@@ -60,15 +61,32 @@ export async function requireDeskAccess() {
   return { context, schoolId };
 }
 
+export async function getActiveStudentId(context: AuthContext): Promise<string | null> {
+  const cookieStore = await cookies();
+  const requested = cookieStore.get(ACTIVE_STUDENT_COOKIE)?.value;
+  const allowed = context.acceptedParentLinks.map((link) => link.student_id);
+
+  if (requested && allowed.includes(requested)) {
+    return requested;
+  }
+
+  return allowed[0] ?? null;
+}
+
+export function isAcceptedParentChild(context: AuthContext, studentId: string) {
+  return context.acceptedParentLinks.some((link) => link.student_id === studentId);
+}
+
 export async function requireParentWorkspace() {
   const context = await requireAuth();
-  if (
-    context.acceptedParentLinks.length === 0 &&
-    context.pendingParentInvites.length === 0 &&
-    !context.isSuperAdmin
-  ) {
-    // Still allow an authenticated parent account with no links yet.
-    return { context };
-  }
   return { context };
+}
+
+export async function requireParentChild(studentId: string) {
+  const context = await requireAuth();
+  const link = context.acceptedParentLinks.find((row) => row.student_id === studentId);
+  if (!link) {
+    redirect("/unauthorized");
+  }
+  return { context, studentId, schoolId: link.school_id };
 }

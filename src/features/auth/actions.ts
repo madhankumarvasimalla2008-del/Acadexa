@@ -103,3 +103,24 @@ export async function setActiveSchoolAction(schoolId: string) {
   });
   revalidatePath("/");
 }
+
+export async function setActiveStudentAction(studentId: string) {
+  const { cookies } = await import("next/headers");
+  const { requireAuth } = await import("@/lib/auth/session");
+  const { ACTIVE_STUDENT_COOKIE, isAcceptedParentChild } = await import(
+    "@/lib/auth/workspace"
+  );
+  const context = await requireAuth();
+  if (!isAcceptedParentChild(context, studentId)) {
+    return;
+  }
+  const cookieStore = await cookies();
+  cookieStore.set(ACTIVE_STUDENT_COOKIE, studentId, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
+  revalidatePath("/parent");
+  redirect(`/parent/children/${studentId}`);
+}
