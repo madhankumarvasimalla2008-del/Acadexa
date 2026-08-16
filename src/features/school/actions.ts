@@ -13,6 +13,14 @@ import {
 } from "@/lib/validations/phase0";
 import type { ActionState } from "@/features/auth/actions";
 
+function revalidateSchoolPaths() {
+  revalidatePath("/school");
+  revalidatePath("/school/years");
+  revalidatePath("/school/classes");
+  revalidatePath("/school/students");
+  revalidatePath("/school/parents");
+}
+
 export async function createAcademicYearAction(
   _prev: ActionState,
   formData: FormData,
@@ -52,7 +60,7 @@ export async function createAcademicYearAction(
     entityType: "academic_years",
     entityId: data.id,
   });
-  revalidatePath("/school");
+  revalidateSchoolPaths();
   return { success: "Academic year created." };
 }
 
@@ -90,7 +98,7 @@ export async function createClassAction(
     entityType: "classes",
     entityId: data.id,
   });
-  revalidatePath("/school");
+  revalidateSchoolPaths();
   return { success: "Class created." };
 }
 
@@ -128,7 +136,7 @@ export async function createStudentAction(
     entityType: "students",
     entityId: data.id,
   });
-  revalidatePath("/school");
+  revalidateSchoolPaths();
   return { success: "Student created. Enroll them in a year/class next." };
 }
 
@@ -179,7 +187,7 @@ export async function createEnrollmentAction(
     entityType: "student_enrollments",
     entityId: data.id,
   });
-  revalidatePath("/school");
+  revalidateSchoolPaths();
   return { success: "Enrollment recorded." };
 }
 
