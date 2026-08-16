@@ -20,6 +20,11 @@ export default async function LoginPage({
         <CardContent>
           <LoginForm nextPath={nextPath} />
           <p className="mt-4 text-sm text-zinc-600">
+            <Link className="text-teal-800 underline" href="/forgot-password">
+              Forgot password?
+            </Link>
+          </p>
+          <p className="mt-2 text-sm text-zinc-600">
             New parent?{" "}
             <Link className="text-teal-800 underline" href="/register">
               Create an account

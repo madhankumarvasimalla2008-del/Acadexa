@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/login") ||
     path.startsWith("/register") ||
     path.startsWith("/forgot-password") ||
+    path.startsWith("/reset-password") ||
     path.startsWith("/auth/");
   const isPublic =
     isAuthRoute || path === "/" || path.startsWith("/api/health");
@@ -54,7 +55,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (claims && (path === "/login" || path === "/register")) {
+  if (claims && (path === "/login" || path === "/register" || path === "/forgot-password")) {
     const url = request.nextUrl.clone();
     url.pathname = "/home";
     return NextResponse.redirect(url);

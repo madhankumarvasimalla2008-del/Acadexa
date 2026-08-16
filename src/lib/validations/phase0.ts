@@ -76,3 +76,15 @@ export const parentInviteSchema = z.object({
 export const inviteTokenSchema = z.object({
   token: z.string().uuid(),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Enter a valid email address."),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters."),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters."),
+}).refine((value) => value.password === value.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});
