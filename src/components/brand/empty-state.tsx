@@ -1,4 +1,15 @@
-type EmptyKind = "students" | "enrollments" | "invites" | "activity";
+type EmptyKind =
+  | "students"
+  | "enrollments"
+  | "invites"
+  | "activity"
+  | "years"
+  | "classes"
+  | "requirements"
+  | "packs"
+  | "payments"
+  | "inventory"
+  | "distribution";
 
 function Illustration({ kind }: { kind: EmptyKind }) {
   if (kind === "students") {
@@ -18,6 +29,77 @@ function Illustration({ kind }: { kind: EmptyKind }) {
         <path d="M24 54V22l36-12 36 12v32" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
         <path d="M60 10v44" stroke="#c9a227" strokeWidth="1.2" />
         <path d="M38 34h16M78 34h16M38 44h12M78 44h12" stroke="#6b1d2a" strokeWidth="1.1" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "years") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="22" y="16" width="76" height="44" rx="6" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M22 30h76" stroke="#c9a227" strokeWidth="1.2" />
+        <path d="M38 22v8M62 22v8M86 22v8" stroke="#6b1d2a" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M34 42h12M54 42h12M74 42h12M34 52h12M54 52h12" stroke="#c9a227" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "classes") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="16" y="20" width="28" height="36" rx="4" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <rect x="46" y="20" width="28" height="36" rx="4" fill="#faf6ef" stroke="#c9a227" strokeWidth="1.2" />
+        <rect x="76" y="20" width="28" height="36" rx="4" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M24 32h12M54 32h12M84 32h12M24 42h8M54 42h8M84 42h8" stroke="#6b1d2a" strokeWidth="1.1" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "requirements") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="18" y="16" width="28" height="40" rx="3" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M24 26h16M24 34h16M24 42h10" stroke="#c9a227" strokeWidth="1.2" strokeLinecap="round" />
+        <rect x="46" y="20" width="28" height="36" rx="3" fill="#faf6ef" stroke="#c9a227" strokeWidth="1.2" />
+        <circle cx="60" cy="38" r="8" fill="none" stroke="#6b1d2a" strokeWidth="1.2" />
+        <rect x="74" y="18" width="28" height="38" rx="3" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M82 30h12M82 38h12M82 46h8" stroke="#6b1d2a" strokeWidth="1.1" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "packs") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="20" y="18" width="36" height="40" rx="4" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M28 30h20M28 38h16M28 46h12" stroke="#c9a227" strokeWidth="1.2" strokeLinecap="round" />
+        <rect x="58" y="22" width="42" height="34" rx="4" fill="#faf6ef" stroke="#c9a227" strokeWidth="1.2" />
+        <path d="M68 34h22M68 42h16" stroke="#6b1d2a" strokeWidth="1.1" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "payments") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="18" y="20" width="84" height="36" rx="6" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M18 32h84" stroke="#c9a227" strokeWidth="1.2" />
+        <path d="M30 44h24M78 44h16" stroke="#6b1d2a" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "inventory") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="18" y="22" width="28" height="32" rx="3" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <rect x="46" y="16" width="28" height="38" rx="3" fill="#faf6ef" stroke="#c9a227" strokeWidth="1.2" />
+        <rect x="74" y="26" width="28" height="28" rx="3" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M24 34h16M52 28h16M80 38h16" stroke="#c9a227" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === "distribution") {
+    return (
+      <svg aria-hidden viewBox="0 0 120 72" className="mx-auto h-16 w-auto">
+        <rect x="18" y="18" width="40" height="40" rx="5" fill="#fff" stroke="#6b1d2a" strokeWidth="1.2" />
+        <path d="M28 32h20M28 40h14" stroke="#c9a227" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M68 28h28v8H68Z" fill="#faf6ef" stroke="#c9a227" strokeWidth="1.2" />
+        <path d="M76 44h20M76 52h12" stroke="#6b1d2a" strokeWidth="1.1" strokeLinecap="round" />
       </svg>
     );
   }

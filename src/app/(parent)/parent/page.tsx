@@ -42,7 +42,7 @@ export default async function ParentChildrenPage() {
           <CardTitle>Approved children</CardTitle>
           <CardDescription>
             Context follows the selected child, including children at different
-            schools. Packs and payments are not available yet.
+            schools. Open a child to view packs and checkout.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">

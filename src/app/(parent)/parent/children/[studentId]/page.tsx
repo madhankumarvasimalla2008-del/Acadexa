@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -179,10 +180,18 @@ export default async function ParentChildHomePage({
         <CardHeader>
           <CardTitle>Requirements and packs</CardTitle>
           <CardDescription>
-            Catalog, packs, and payments are not in this phase. This screen only
-            shows this child’s school and enrollment context.
+            Packs for this child are limited to the school, year, and class on the
+            enrollment record.
           </CardDescription>
         </CardHeader>
+        <CardContent>
+          <Link
+            href={`/parent/children/${studentId}/packs`}
+            className="inline-flex h-10 items-center justify-center rounded-md bg-[#6b1d2a] px-4 text-sm font-medium text-[#f7e0a3]"
+          >
+            View packs and checkout
+          </Link>
+        </CardContent>
       </Card>
     </div>
   );

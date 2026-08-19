@@ -5,8 +5,12 @@ import { writeAuditLog } from "@/lib/audit";
 import { requireSchoolAdmin } from "@/lib/auth/workspace";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
+  academicYearIdSchema,
   academicYearSchema,
+  academicYearUpdateSchema,
+  classIdSchema,
   classSchema,
+  classUpdateSchema,
   enrollmentSchema,
   parentInviteSchema,
   studentSchema,
@@ -20,6 +24,37 @@ function revalidateSchoolPaths() {
   revalidatePath("/school/students");
   revalidatePath("/school/students/import");
   revalidatePath("/school/parents");
+}
+
+function mapSchoolWriteError(
+  error: { code?: string; message: string },
+  kind: "year" | "class",
+): string {
+  const code = error.code ?? "";
+  const message = error.message ?? "";
+  if (code === "23505" || /duplicate key|unique constraint/i.test(message)) {
+    return kind === "year"
+      ? "An academic year with this name already exists for this school."
+      : "A class with this name and section already exists for this school.";
+  }
+  if (code === "23503" || /foreign key|violates foreign key/i.test(message)) {
+    return kind === "year"
+      ? "This year cannot be removed while students are enrolled in it."
+      : "This class cannot be removed while students are enrolled in it.";
+  }
+  if (code === "23514" || /check constraint|dates_check/i.test(message)) {
+    return "The end date must be after the start date.";
+  }
+  return message || "Could not save changes.";
+}
+
+function classSortOrder(name: string): number {
+  const match = name.match(/(\d{1,2})/);
+  if (!match) {
+    return 0;
+  }
+  const value = Number.parseInt(match[1], 10);
+  return value >= 1 && value <= 12 ? value : 0;
 }
 
 export async function createAcademicYearAction(
@@ -52,7 +87,7 @@ export async function createAcademicYearAction(
     .single();
 
   if (error) {
-    return { error: error.message };
+    return { error: mapSchoolWriteError(error, "year") };
   }
 
   await writeAuditLog({
@@ -63,6 +98,116 @@ export async function createAcademicYearAction(
   });
   revalidateSchoolPaths();
   return { success: "Academic year created." };
+}
+
+export async function updateAcademicYearAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const { schoolId } = await requireSchoolAdmin();
+  const parsed = academicYearUpdateSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    startsOn: formData.get("startsOn"),
+    endsOn: formData.get("endsOn"),
+    isCurrent: formData.get("isCurrent") === "on",
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid year." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("academic_years")
+    .update({
+      name: parsed.data.name,
+      starts_on: parsed.data.startsOn,
+      ends_on: parsed.data.endsOn,
+      is_current: parsed.data.isCurrent ?? false,
+    })
+    .eq("id", parsed.data.id)
+    .eq("school_id", schoolId);
+
+  if (error) {
+    return { error: mapSchoolWriteError(error, "year") };
+  }
+
+  await writeAuditLog({
+    schoolId,
+    action: "academic_year.update",
+    entityType: "academic_years",
+    entityId: parsed.data.id,
+  });
+  revalidateSchoolPaths();
+  return { success: "Academic year updated." };
+}
+
+export async function setCurrentAcademicYearAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const { schoolId } = await requireSchoolAdmin();
+  const parsed = academicYearIdSchema.safeParse({ id: formData.get("id") });
+  if (!parsed.success) {
+    return { error: "Invalid year." };
+  }
+
+  const makeCurrent = formData.get("isCurrent") === "on";
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("academic_years")
+    .update({ is_current: makeCurrent })
+    .eq("id", parsed.data.id)
+    .eq("school_id", schoolId);
+
+  if (error) {
+    return { error: mapSchoolWriteError(error, "year") };
+  }
+
+  await writeAuditLog({
+    schoolId,
+    action: makeCurrent ? "academic_year.set_current" : "academic_year.clear_current",
+    entityType: "academic_years",
+    entityId: parsed.data.id,
+  });
+  revalidateSchoolPaths();
+  return {
+    success: makeCurrent
+      ? "This is now the current academic year."
+      : "Year marked as historical.",
+  };
+}
+
+export async function deleteAcademicYearAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const { schoolId } = await requireSchoolAdmin();
+  const parsed = academicYearIdSchema.safeParse({ id: formData.get("id") });
+  if (!parsed.success) {
+    return { error: "Invalid year." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("academic_years")
+    .delete()
+    .eq("id", parsed.data.id)
+    .eq("school_id", schoolId);
+
+  if (error) {
+    return { error: mapSchoolWriteError(error, "year") };
+  }
+
+  await writeAuditLog({
+    schoolId,
+    action: "academic_year.delete",
+    entityType: "academic_years",
+    entityId: parsed.data.id,
+  });
+  revalidateSchoolPaths();
+  return { success: "Academic year removed." };
 }
 
 export async function createClassAction(
@@ -85,12 +230,13 @@ export async function createClassAction(
       school_id: schoolId,
       name: parsed.data.name,
       section: parsed.data.section || null,
+      sort_order: classSortOrder(parsed.data.name),
     })
     .select("id")
     .single();
 
   if (error) {
-    return { error: error.message };
+    return { error: mapSchoolWriteError(error, "class") };
   }
 
   await writeAuditLog({
@@ -101,6 +247,76 @@ export async function createClassAction(
   });
   revalidateSchoolPaths();
   return { success: "Class created." };
+}
+
+export async function updateClassAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const { schoolId } = await requireSchoolAdmin();
+  const parsed = classUpdateSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    section: formData.get("section"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid class." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("classes")
+    .update({
+      name: parsed.data.name,
+      section: parsed.data.section || null,
+      sort_order: classSortOrder(parsed.data.name),
+    })
+    .eq("id", parsed.data.id)
+    .eq("school_id", schoolId);
+
+  if (error) {
+    return { error: mapSchoolWriteError(error, "class") };
+  }
+
+  await writeAuditLog({
+    schoolId,
+    action: "class.update",
+    entityType: "classes",
+    entityId: parsed.data.id,
+  });
+  revalidateSchoolPaths();
+  return { success: "Class updated." };
+}
+
+export async function deleteClassAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const { schoolId } = await requireSchoolAdmin();
+  const parsed = classIdSchema.safeParse({ id: formData.get("id") });
+  if (!parsed.success) {
+    return { error: "Invalid class." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("classes")
+    .delete()
+    .eq("id", parsed.data.id)
+    .eq("school_id", schoolId);
+
+  if (error) {
+    return { error: mapSchoolWriteError(error, "class") };
+  }
+
+  await writeAuditLog({
+    schoolId,
+    action: "class.delete",
+    entityType: "classes",
+    entityId: parsed.data.id,
+  });
+  revalidateSchoolPaths();
+  return { success: "Class removed." };
 }
 
 export async function createStudentAction(

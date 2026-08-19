@@ -19,7 +19,10 @@ export function ParentNav({
   const items = [
     { href: "/parent", label: "Children", exact: true },
     ...(childHomeHref
-      ? [{ href: childHomeHref, label: "Child home", exact: false }]
+      ? [
+          { href: childHomeHref, label: "Child home", exact: true },
+          { href: `${childHomeHref}/packs`, label: "Packs", exact: false },
+        ]
       : []),
   ];
 

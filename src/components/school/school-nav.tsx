@@ -10,11 +10,11 @@ export const SCHOOL_NAV = [
   { href: "/school/classes", label: "Classes" },
   { href: "/school/students", label: "Students" },
   { href: "/school/parents", label: "Parents" },
-  { href: "/school/requirements", label: "Requirements", soon: true },
-  { href: "/school/packs", label: "Packs", soon: true },
-  { href: "/school/inventory", label: "Inventory", soon: true },
-  { href: "/school/payments", label: "Payments", soon: true },
-  { href: "/school/distribution", label: "Distribution", soon: true },
+  { href: "/school/requirements", label: "Requirements" },
+  { href: "/school/packs", label: "Packs" },
+  { href: "/school/inventory", label: "Inventory" },
+  { href: "/school/payments", label: "Payments" },
+  { href: "/school/distribution", label: "Distribution" },
   { href: "/school/reports", label: "Reports", soon: true },
 ] as const;
 

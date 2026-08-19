@@ -8,10 +8,14 @@ export function FoundationForm({
   action,
   children,
   submitLabel,
+  submitClassName,
+  submitVariant = "default",
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   children: React.ReactNode;
   submitLabel: string;
+  submitClassName?: string;
+  submitVariant?: "default" | "outline" | "ghost" | "destructive";
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const [copied, setCopied] = useState(false);
@@ -75,7 +79,13 @@ export function FoundationForm({
           ) : null}
         </div>
       ) : null}
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button
+        type="submit"
+        size="sm"
+        variant={submitVariant}
+        className={submitClassName}
+        disabled={pending}
+      >
         {pending ? "Saving…" : submitLabel}
       </Button>
     </form>

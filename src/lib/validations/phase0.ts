@@ -43,15 +43,31 @@ export const membershipIdSchema = z.object({
 });
 
 export const academicYearSchema = z.object({
-  name: z.string().min(4).max(40),
+  name: z.string().trim().min(4).max(40),
   startsOn: z.string().min(10).max(10),
   endsOn: z.string().min(10).max(10),
   isCurrent: z.boolean().optional(),
 });
 
+export const academicYearIdSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const academicYearUpdateSchema = academicYearSchema.extend({
+  id: z.string().uuid(),
+});
+
 export const classSchema = z.object({
-  name: z.string().min(1).max(80),
-  section: z.string().max(20).optional().or(z.literal("")),
+  name: z.string().trim().min(1).max(80),
+  section: z.string().trim().max(20).optional().or(z.literal("")),
+});
+
+export const classUpdateSchema = classSchema.extend({
+  id: z.string().uuid(),
+});
+
+export const classIdSchema = z.object({
+  id: z.string().uuid(),
 });
 
 export const studentSchema = z.object({
