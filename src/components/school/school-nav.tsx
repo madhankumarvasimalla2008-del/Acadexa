@@ -35,10 +35,10 @@ export function SchoolNav({ onNavigate }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center justify-between rounded-md px-3 py-2 text-sm",
+              "flex items-center justify-between rounded-md px-3 py-2 text-sm transition-[color,background-color,transform] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none",
               active
-                ? "bg-teal-800 text-white"
-                : "text-zinc-700 hover:bg-zinc-100",
+                ? "bg-[#c9a227] font-medium text-[#6b1d2a]"
+                : "text-white/90 hover:translate-x-0.5 hover:bg-white/10 hover:text-white",
             )}
           >
             <span>{item.label}</span>
@@ -46,7 +46,7 @@ export function SchoolNav({ onNavigate }: { onNavigate?: () => void }) {
               <span
                 className={cn(
                   "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide",
-                  active ? "bg-teal-700 text-teal-50" : "bg-zinc-100 text-zinc-500",
+                  active ? "bg-[#6b1d2a] text-[#f7e0a3]" : "bg-white/10 text-[#f7e0a3]",
                 )}
               >
                 Later

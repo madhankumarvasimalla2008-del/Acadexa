@@ -32,7 +32,7 @@ export function AppHeader({
           </Link>
           <p className="text-xs text-zinc-500">Phase 0 foundation</p>
         </div>
-        <nav className="flex flex-wrap items-center gap-2 text-sm">
+        <nav className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <WorkspaceSwitcher workspaces={workspaces} />
           {schools.length > 1
             ? schools.map(([id, name]) => (
@@ -47,7 +47,7 @@ export function AppHeader({
                 </form>
               ))
             : null}
-          <span className="text-zinc-500">{context.email}</span>
+          <span className="max-w-full truncate text-zinc-500">{context.email}</span>
           <form action={logoutAction}>
             <Button type="submit" variant="outline" size="sm">
               Sign out

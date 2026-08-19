@@ -23,7 +23,7 @@ export function PlatformShell({
   const adminLabel = adminName.trim() || adminEmail || "Super Admin";
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen overflow-x-hidden bg-zinc-50">
       <a
         href="#platform-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow"
@@ -70,14 +70,14 @@ export function PlatformShell({
         {menuOpen ? (
           <button
             type="button"
-            className="fixed inset-0 z-20 bg-zinc-900/30 lg:hidden"
+            className="fixed inset-0 z-30 bg-zinc-900/30 lg:hidden"
             aria-label="Close menu"
             onClick={() => setMenuOpen(false)}
           />
         ) : null}
         <aside
           id="platform-sidebar"
-          className={`fixed inset-y-0 left-0 z-20 w-64 border-r border-zinc-200 bg-white px-3 py-4 pt-20 lg:static lg:z-0 lg:block lg:min-h-[calc(100vh-57px)] lg:w-60 lg:pt-4 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[min(16rem,85vw)] overflow-y-auto border-r border-zinc-200 bg-white px-3 py-4 pt-20 lg:static lg:z-0 lg:block lg:min-h-[calc(100vh-57px)] lg:w-60 lg:pt-4 ${
             menuOpen ? "block" : "hidden lg:block"
           }`}
         >

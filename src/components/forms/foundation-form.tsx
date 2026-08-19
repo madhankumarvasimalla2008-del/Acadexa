@@ -24,8 +24,27 @@ export function FoundationForm({
     if (!state?.href) {
       return;
     }
-    await navigator.clipboard.writeText(state.href);
-    setCopied(true);
+    try {
+      await navigator.clipboard.writeText(state.href);
+      setCopied(true);
+      return;
+    } catch {
+      /* HTTP / iOS may not expose clipboard */
+    }
+    try {
+      const field = document.createElement("textarea");
+      field.value = state.href;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.left = "-9999px";
+      document.body.appendChild(field);
+      field.select();
+      document.execCommand("copy");
+      document.body.removeChild(field);
+      setCopied(true);
+    } catch {
+      /* Link remains visible to copy manually */
+    }
   }
 
   return (

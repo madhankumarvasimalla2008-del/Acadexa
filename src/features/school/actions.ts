@@ -18,6 +18,7 @@ function revalidateSchoolPaths() {
   revalidatePath("/school/years");
   revalidatePath("/school/classes");
   revalidatePath("/school/students");
+  revalidatePath("/school/students/import");
   revalidatePath("/school/parents");
 }
 

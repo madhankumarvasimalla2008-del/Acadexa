@@ -16,4 +16,285 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
 }
+
+.acadexa-kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.acadexa-display {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.acadexa-lede {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.acadexa-surface {
+  background-color: #faf6ef;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgb(201 162 39 / 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgb(107 29 42 / 0.09), transparent 50%);
+}
+
+@keyframes acadexa-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-160px, -160px, 0);
+  }
+}
+
+.acadexa-pattern-drift {
+  pointer-events: none;
+  position: absolute;
+  inset: -15%;
+  background-image: url("/patterns/abps-lattice.svg");
+  opacity: 0.7;
+  animation: acadexa-drift 72s linear infinite;
+}
+
+.acadexa-glass {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.68));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    0 10px 28px -18px rgb(107 29 42 / 0.42);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.acadexa-glass-hero {
+  background: linear-gradient(165deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.06));
+  box-shadow:
+    inset 0 1px 0 rgb(247 224 163 / 0.28),
+    0 10px 24px -16px rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.acadexa-glass-dark {
+  background: rgb(255 255 255 / 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.acadexa-header-pattern {
+  background-color: #6b1d2a;
+  background-image: url("/patterns/abps-header.svg");
+}
+
+.acadexa-hero-pattern {
+  background-image: url("/patterns/abps-hero.svg");
+}
+
+.acadexa-card-premium {
+  box-shadow:
+    inset 0 2px 0 #c9a227,
+    0 1px 2px rgb(107 29 42 / 0.06),
+    0 8px 24px -18px rgb(107 29 42 / 0.28);
+}
+
+.acadexa-icon-pop {
+  transition: transform 0.2s ease-out;
+}
+
+.acadexa-lift:hover .acadexa-icon-pop,
+.group:hover .acadexa-icon-pop {
+  transform: translateY(-1px) scale(1.06);
+}
+
+@keyframes acadexa-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes acadexa-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.acadexa-anim-logo {
+  animation: acadexa-logo-in 0.5s ease-out both;
+}
+
+.acadexa-anim-fade-up {
+  animation: acadexa-fade-up 0.45s ease-out both;
+}
+
+.acadexa-anim-page {
+  animation: acadexa-fade-up 0.5s ease-out both;
+}
+
+@keyframes acadexa-empty-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.acadexa-empty {
+  animation: acadexa-empty-in 0.45s ease-out both;
+}
+
+.acadexa-delay-1 {
+  animation-delay: 70ms;
+}
+.acadexa-delay-2 {
+  animation-delay: 120ms;
+}
+.acadexa-delay-3 {
+  animation-delay: 170ms;
+}
+.acadexa-delay-4 {
+  animation-delay: 220ms;
+}
+.acadexa-delay-5 {
+  animation-delay: 270ms;
+}
+
+.acadexa-lift {
+  transition:
+    transform 0.22s ease-out,
+    box-shadow 0.22s ease-out,
+    border-color 0.22s ease-out;
+}
+
+.acadexa-lift:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 14px 28px -14px rgb(107 29 42 / 0.36),
+    0 6px 12px -8px rgb(201 162 39 / 0.45);
+}
+
+.acadexa-card-premium.acadexa-lift:hover {
+  box-shadow:
+    inset 0 2px 0 #c9a227,
+    0 16px 32px -16px rgb(107 29 42 / 0.4),
+    0 0 0 1px rgb(201 162 39 / 0.28);
+}
+
+@keyframes acadexa-sheen {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translateX(-10%);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(12%);
+  }
+}
+
+.acadexa-hero-sheen {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 36%,
+    rgb(247 224 163 / 0.16) 50%,
+    transparent 64%
+  );
+  animation: acadexa-sheen 11s ease-in-out infinite;
+}
+
+@keyframes acadexa-hero-light {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.58;
+    transform: translate3d(18px, -10px, 0) scale(1.08);
+  }
+}
+
+.acadexa-hero-light {
+  pointer-events: none;
+  position: absolute;
+  left: -12%;
+  top: -30%;
+  height: 70%;
+  width: 55%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgb(247 224 163 / 0.28), transparent 68%);
+  animation: acadexa-hero-light 12s ease-in-out infinite;
+}
+
+.acadexa-timeline-rail {
+  background: linear-gradient(180deg, #c9a227, rgb(201 162 39 / 0.15));
+}
+
+@keyframes acadexa-dot-soft {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.12);
+  }
+}
+
+.acadexa-timeline-dot-live {
+  animation: acadexa-dot-soft 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acadexa-anim-logo,
+  .acadexa-anim-fade-up,
+  .acadexa-anim-page,
+  .acadexa-empty,
+  .acadexa-pattern-drift,
+  .acadexa-hero-sheen,
+  .acadexa-hero-light,
+  .acadexa-timeline-dot-live {
+    animation: none !important;
+  }
+
+  .acadexa-lift,
+  .acadexa-lift:hover {
+    transition: none;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .acadexa-hero-sheen,
+  .acadexa-hero-light,
+  .acadexa-timeline-dot-live,
+  .acadexa-icon-pop,
+  .acadexa-lift:hover .acadexa-icon-pop,
+  .group:hover .acadexa-icon-pop {
+    animation: none !important;
+    transition: none;
+    transform: none;
+  }
+}
+

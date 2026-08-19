@@ -1,12 +1,14 @@
 # Acadexa — Development Plan
 
-**Status:** V1 decisions locked. **Phase 0 is the current implementation scope** (foundation only; stop after Phase 0).  
+**Status:** V1 decisions locked. **Phase 0 is complete** (foundation only), with an accepted exit exception for live School A/B isolation. Do not start Phase 1 automatically.  
 **V1 decisions locked:** [ACADEXA_SPEC.md](./ACADEXA_SPEC.md) §3.  
 **Related:** [ARCHITECTURE.md](./ARCHITECTURE.md), [DATABASE.md](./DATABASE.md), [ROLES_AND_PERMISSIONS.md](./ROLES_AND_PERMISSIONS.md)
 
 ## 1. Goal of the current phase
 
-**Phase 0 is implemented in the repository** (foundation only). Stop here — do not start Phase 1 automatically.
+**Phase 0 is complete in the repository** (foundation only). Stop here — do not start Phase 1 automatically.
+
+**Accepted exit exception (2026-08-17):** the Phase 0 criterion “two school admins cannot see each other’s schools” is **BLOCKED** because the live project has insufficient existing tenant data (one school; two school admins on that same school). Isolation was not proven with two school-admin sessions. This exception was accepted so Phase 0 can close **without** creating test data or changing the database.
 
 Planning documents remain the source of V1 product rules.
 
@@ -25,6 +27,8 @@ Each phase should be mergeable with migrations + RLS tests. Do not skip RLS.
 - Super Admin: create school, assign school admin
 
 **Exit:** Two school admins cannot see each other’s schools.
+
+**Exit verification:** **BLOCKED** (accepted exception). Live data has one school; both school admins belong to it. No test tenants were created.
 
 ### Phase 1 — Academic structure, students, school-controlled links
 

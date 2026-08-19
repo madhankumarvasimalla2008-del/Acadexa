@@ -16,6 +16,7 @@ export type School = {
   id: string;
   name: string;
   code: string;
+  short_name: string | null;
   status: SchoolStatus;
 };
 

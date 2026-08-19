@@ -29,13 +29,16 @@ export default async function SchoolLayout({
     ).entries(),
   ].map(([id, name]) => ({ id, name }));
 
-  const schoolName =
-    context.memberships.find((membership) => membership.school_id === schoolId)?.schools
-      ?.name ?? "School";
+  const activeSchool = context.memberships.find(
+    (membership) => membership.school_id === schoolId,
+  )?.schools;
+  const schoolName = activeSchool?.name ?? "School";
+  const shortName = activeSchool?.short_name?.trim() || null;
 
   return (
     <SchoolShell
       schoolName={schoolName}
+      shortName={shortName}
       academicYearName={currentYear?.name ?? null}
       adminName={context.profile?.full_name ?? ""}
       adminEmail={context.email}

@@ -17,7 +17,14 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
       <input type="hidden" name="next" value={nextPath} />
       <div className="space-y-1.5">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required autoComplete="email" />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          className="h-11 focus-visible:ring-[#6b1d2a]"
+        />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
@@ -28,6 +35,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
           required
           minLength={8}
           autoComplete="current-password"
+          className="h-11 focus-visible:ring-[#6b1d2a]"
         />
       </div>
       {state?.error ? (
@@ -35,7 +43,11 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
           {state.error}
         </p>
       ) : null}
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button
+        type="submit"
+        className="mt-2 h-11 w-full bg-[#6b1d2a] text-white transition-transform duration-200 ease-out hover:-translate-y-px hover:bg-[#54151f] motion-reduce:transform-none motion-reduce:transition-none"
+        disabled={pending}
+      >
         {pending ? "Signing in…" : "Sign in"}
       </Button>
     </form>

@@ -1,6 +1,6 @@
 # Acadexa — System Architecture
 
-**Status:** V1 decisions locked. Phase 0 implements the secure foundation only.  
+**Status:** V1 decisions locked. Phase 0 (secure foundation) is complete, with an accepted exception that live School A/B isolation was not proven (insufficient existing tenant data).  
 **V1 decisions:** Locked in [ACADEXA_SPEC.md](./ACADEXA_SPEC.md) §3.  
 **Companion docs:** [DATABASE.md](./DATABASE.md), [ROLES_AND_PERMISSIONS.md](./ROLES_AND_PERMISSIONS.md), [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md)
 

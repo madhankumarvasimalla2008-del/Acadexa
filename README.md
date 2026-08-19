@@ -2,11 +2,13 @@
 
 Multi-school platform for books, uniforms, parent payments, digital receipts, inventory, and **on-campus collection**. Not a delivery product.
 
-## Phase 0 (current)
+## Phase 0 (complete)
 
 Secure foundation only: Next.js App Router, TypeScript, Tailwind, shadcn-style UI primitives, Supabase Auth, tenant models, enrollments, parent invitations, RLS, protected routes.
 
-Do not expect packs, payments, inventory, or distribution UIs yet.
+Live School A/B isolation was **not** proven: the project has one school. That exit exception is accepted. Do not create test tenants for it.
+
+Do not expect packs, payments, inventory, or distribution UIs yet. Do not start Phase 1 automatically.
 
 ## Setup
 

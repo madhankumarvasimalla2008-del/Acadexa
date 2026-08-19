@@ -37,7 +37,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
   const { data: membershipRows } = await supabase
     .from("school_memberships")
-    .select("id, school_id, user_id, role, schools ( id, name, code, status )")
+    .select("id, school_id, user_id, role, schools ( id, name, code, short_name, status )")
     .eq("user_id", user.id);
 
   const memberships: SchoolMembership[] = (membershipRows ?? []).map((row) => {

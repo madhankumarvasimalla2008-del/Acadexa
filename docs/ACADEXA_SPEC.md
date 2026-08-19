@@ -1,6 +1,6 @@
 # Acadexa — Product Specification (Foundation)
 
-**Status:** V1 decisions locked. **Phase 0 implementation in progress** (foundation only).  
+**Status:** V1 decisions locked. **Phase 0 complete** (foundation only; live School A/B isolation blocked by insufficient tenant data — accepted exception).  
 **Audience:** Product, architecture, and engineering review.  
 **Updated:** 2026-08-14 — additional V1 locks: parent invite/accept, dual roles, enrollments, pack snapshots, school-admin distribution.
 
