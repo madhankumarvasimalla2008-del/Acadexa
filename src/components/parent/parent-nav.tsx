@@ -21,6 +21,8 @@ export function ParentNav({
     ...(childHomeHref
       ? [
           { href: childHomeHref, label: "Child home", exact: true },
+          { href: `${childHomeHref}/requirements`, label: "Requirements", exact: false },
+          { href: `${childHomeHref}/catalog`, label: "Catalog", exact: false },
           { href: `${childHomeHref}/packs`, label: "Packs", exact: false },
         ]
       : []),

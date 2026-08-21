@@ -178,16 +178,27 @@ export default async function ParentChildHomePage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Requirements and packs</CardTitle>
+          <CardTitle>Requirements, Catalog & Packs</CardTitle>
           <CardDescription>
-            Packs for this child are limited to the school, year, and class on the
-            enrollment record.
+            Browse required items, textbooks, uniforms, and curated packs for {student.full_name}.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-wrap gap-3">
+          <Link
+            href={`/parent/children/${studentId}/requirements`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-[#c9a227]/40 bg-white px-4 text-sm font-medium text-[#6b1d2a] hover:bg-[#faf6ef]"
+          >
+            Required list
+          </Link>
+          <Link
+            href={`/parent/children/${studentId}/catalog`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-[#c9a227]/40 bg-white px-4 text-sm font-medium text-[#6b1d2a] hover:bg-[#faf6ef]"
+          >
+            Browse catalog
+          </Link>
           <Link
             href={`/parent/children/${studentId}/packs`}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-[#6b1d2a] px-4 text-sm font-medium text-[#f7e0a3]"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-[#6b1d2a] px-4 text-sm font-medium text-[#f7e0a3] hover:bg-[#4a121c]"
           >
             View packs and checkout
           </Link>
