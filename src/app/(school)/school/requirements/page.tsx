@@ -4,6 +4,7 @@ import { FoundationForm } from "@/components/forms/foundation-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProductImageManager, type ImageSummary } from "@/components/school/product-image-manager";
 import {
   createRequirementAction,
   deleteRequirementAction,
@@ -30,6 +31,7 @@ type ProductInfo = {
   name: string;
   kind: "book" | "uniform" | "other";
   subject: string | null;
+  description: string | null;
 };
 
 type VariantInfo = {
@@ -54,6 +56,13 @@ function classLabel(name: string, section: string | null) {
 
 function categoryLabel(kind: string) {
   return CATEGORIES.find((item) => item.value === kind)?.label ?? kind;
+}
+
+function supabaseStorageUrl(storagePath: string): string {
+  const base = (
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""
+  ).replace(/\/+$/, "");
+  return `${base}/storage/v1/object/public/product-images/${storagePath}`;
 }
 
 export default async function RequirementsPage({
@@ -99,7 +108,7 @@ export default async function RequirementsPage({
   let requirementQuery = supabase
     .from("school_requirements")
     .select(
-      "id, required_quantity, is_active, academic_year_id, class_id, product_variant_id, product_variants ( id, unit_price_amount, products ( id, name, kind, subject ) )",
+      "id, required_quantity, is_active, academic_year_id, class_id, product_variant_id, product_variants ( id, unit_price_amount, products ( id, name, kind, subject, description ) )",
     )
     .eq("school_id", schoolId)
     .order("created_at", { ascending: false });
@@ -128,15 +137,43 @@ export default async function RequirementsPage({
       isActive: Boolean(row.is_active),
       academicYearId: row.academic_year_id as string,
       classId: row.class_id as string,
+      productId: product?.id ?? "",
       name: product?.name ?? "Untitled item",
       kind: product?.kind ?? "other",
       subject: product?.subject ?? "",
+      description: product?.description ?? "",
       unitPrice:
         variant?.unit_price_amount === null || variant?.unit_price_amount === undefined
           ? ""
           : String(variant.unit_price_amount),
     };
   });
+
+  const productIds = Array.from(new Set(rows.map((r) => r.productId).filter(Boolean)));
+  const { data: rawImages } =
+    productIds.length > 0
+      ? await supabase
+          .from("product_images")
+          .select("id, product_id, storage_path, is_primary, alt_text")
+          .eq("school_id", schoolId)
+          .in("product_id", productIds)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true })
+      : { data: [] };
+
+  const imagesByProduct = new Map<string, ImageSummary[]>();
+  for (const img of rawImages ?? []) {
+    const list = imagesByProduct.get(img.product_id) ?? [];
+    list.push({
+      id: img.id,
+      productId: img.product_id,
+      storagePath: img.storage_path,
+      isPrimary: Boolean(img.is_primary),
+      altText: img.alt_text,
+      url: supabaseStorageUrl(img.storage_path),
+    });
+    imagesByProduct.set(img.product_id, list);
+  }
 
   const missingStructure = years.length === 0 || classes.length === 0;
 
@@ -283,6 +320,13 @@ export default async function RequirementsPage({
               <Input id="name" name="name" required className={fieldClass} placeholder="English Reader" />
               <Label htmlFor="subject">Subject (books)</Label>
               <Input id="subject" name="subject" className={fieldClass} placeholder="English" />
+              <Label htmlFor="description">Description (optional)</Label>
+              <Input
+                id="description"
+                name="description"
+                className={fieldClass}
+                placeholder="Prescribed textbook edition, publisher, syllabus notes..."
+              />
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="quantity">Quantity required</Label>
@@ -339,138 +383,159 @@ export default async function RequirementsPage({
             />
           ) : (
             <ul className="space-y-4">
-              {rows.map((row) => (
-                <li
-                  key={row.id}
-                  className="rounded-xl border border-[#c9a227]/25 bg-white/80 p-4 shadow-sm"
-                >
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <p className="font-medium text-[#6b1d2a]">{row.name}</p>
-                    <span className="rounded-full bg-[#faf6ef] px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-[#6b1d2a]">
-                      {categoryLabel(row.kind)}
-                    </span>
-                    {row.isActive ? null : (
-                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-600">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                  <FoundationForm
-                    action={updateRequirementAction}
-                    submitLabel="Save"
-                    submitClassName={schoolSubmitClass}
+              {rows.map((row) => {
+                const productImages = imagesByProduct.get(row.productId) ?? [];
+                return (
+                  <li
+                    key={row.id}
+                    className="rounded-xl border border-[#c9a227]/25 bg-white/80 p-4 shadow-sm"
                   >
-                    <input type="hidden" name="id" value={row.id} />
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor={`year-${row.id}`}>Academic year</Label>
-                        <select
-                          id={`year-${row.id}`}
-                          name="academicYearId"
-                          required
-                          className={selectClassName}
-                          defaultValue={row.academicYearId}
-                        >
-                          {years.map((year) => (
-                            <option key={year.id} value={year.id}>
-                              {year.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`class-${row.id}`}>Class</Label>
-                        <select
-                          id={`class-${row.id}`}
-                          name="classId"
-                          required
-                          className={selectClassName}
-                          defaultValue={row.classId}
-                        >
-                          {classes.map((klass) => (
-                            <option key={klass.id} value={klass.id}>
-                              {classLabel(klass.name, klass.section)}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-[#6b1d2a]">{row.name}</p>
+                      <span className="rounded-full bg-[#faf6ef] px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-[#6b1d2a]">
+                        {categoryLabel(row.kind)}
+                      </span>
+                      {row.isActive ? null : (
+                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-600">
+                          Inactive
+                        </span>
+                      )}
                     </div>
-                    <Label htmlFor={`kind-${row.id}`}>Category</Label>
-                    <select
-                      id={`kind-${row.id}`}
-                      name="kind"
-                      required
-                      className={selectClassName}
-                      defaultValue={row.kind}
-                    >
-                      {CATEGORIES.map((item) => (
-                        <option key={item.value} value={item.value}>
-                          {item.label}
-                        </option>
-                      ))}
-                    </select>
-                    <Label htmlFor={`name-${row.id}`}>Item name</Label>
-                    <Input
-                      id={`name-${row.id}`}
-                      name="name"
-                      required
-                      defaultValue={row.name}
-                      className={fieldClass}
-                    />
-                    <Label htmlFor={`subject-${row.id}`}>Subject (books)</Label>
-                    <Input
-                      id={`subject-${row.id}`}
-                      name="subject"
-                      defaultValue={row.subject}
-                      className={fieldClass}
-                    />
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor={`qty-${row.id}`}>Quantity required</Label>
-                        <Input
-                          id={`qty-${row.id}`}
-                          name="quantity"
-                          type="number"
-                          min={1}
-                          required
-                          defaultValue={row.quantity}
-                          className={fieldClass}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`price-${row.id}`}>Unit price (INR)</Label>
-                        <Input
-                          id={`price-${row.id}`}
-                          name="unitPrice"
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          defaultValue={row.unitPrice}
-                          className={fieldClass}
-                        />
-                      </div>
-                    </div>
-                    <label className="flex items-center gap-2 text-sm text-[#6b1d2a]">
-                      <input
-                        type="checkbox"
-                        name="isActive"
-                        defaultChecked={row.isActive}
-                        className="h-4 w-4 accent-[#6b1d2a]"
-                      />
-                      Active
-                    </label>
-                  </FoundationForm>
-                  <div className="mt-3">
                     <FoundationForm
-                      action={deleteRequirementAction}
-                      submitLabel="Remove"
-                      submitVariant="destructive"
+                      action={updateRequirementAction}
+                      submitLabel="Save"
+                      submitClassName={schoolSubmitClass}
                     >
                       <input type="hidden" name="id" value={row.id} />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`year-${row.id}`}>Academic year</Label>
+                          <select
+                            id={`year-${row.id}`}
+                            name="academicYearId"
+                            required
+                            className={selectClassName}
+                            defaultValue={row.academicYearId}
+                          >
+                            {years.map((year) => (
+                              <option key={year.id} value={year.id}>
+                                {year.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`class-${row.id}`}>Class</Label>
+                          <select
+                            id={`class-${row.id}`}
+                            name="classId"
+                            required
+                            className={selectClassName}
+                            defaultValue={row.classId}
+                          >
+                            {classes.map((klass) => (
+                              <option key={klass.id} value={klass.id}>
+                                {classLabel(klass.name, klass.section)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <Label htmlFor={`kind-${row.id}`}>Category</Label>
+                      <select
+                        id={`kind-${row.id}`}
+                        name="kind"
+                        required
+                        className={selectClassName}
+                        defaultValue={row.kind}
+                      >
+                        {CATEGORIES.map((item) => (
+                          <option key={item.value} value={item.value}>
+                            {item.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Label htmlFor={`name-${row.id}`}>Item name</Label>
+                      <Input
+                        id={`name-${row.id}`}
+                        name="name"
+                        required
+                        defaultValue={row.name}
+                        className={fieldClass}
+                      />
+                      <Label htmlFor={`subject-${row.id}`}>Subject (books)</Label>
+                      <Input
+                        id={`subject-${row.id}`}
+                        name="subject"
+                        defaultValue={row.subject}
+                        className={fieldClass}
+                      />
+                      <Label htmlFor={`desc-${row.id}`}>Description (optional)</Label>
+                      <Input
+                        id={`desc-${row.id}`}
+                        name="description"
+                        defaultValue={row.description}
+                        placeholder="Textbook edition, notes, specifications..."
+                        className={fieldClass}
+                      />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`qty-${row.id}`}>Quantity required</Label>
+                          <Input
+                            id={`qty-${row.id}`}
+                            name="quantity"
+                            type="number"
+                            min={1}
+                            required
+                            defaultValue={row.quantity}
+                            className={fieldClass}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`price-${row.id}`}>Unit price (INR)</Label>
+                          <Input
+                            id={`price-${row.id}`}
+                            name="unitPrice"
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            defaultValue={row.unitPrice}
+                            className={fieldClass}
+                          />
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-2 text-sm text-[#6b1d2a]">
+                        <input
+                          type="checkbox"
+                          name="isActive"
+                          defaultChecked={row.isActive}
+                          className="h-4 w-4 accent-[#6b1d2a]"
+                        />
+                        Active
+                      </label>
                     </FoundationForm>
-                  </div>
-                </li>
-              ))}
+
+                    {/* Product Photos & Cover Images Management */}
+                    {row.productId ? (
+                      <ProductImageManager
+                        productId={row.productId}
+                        productName={row.name}
+                        images={productImages}
+                      />
+                    ) : null}
+
+                    <div className="mt-3">
+                      <FoundationForm
+                        action={deleteRequirementAction}
+                        submitLabel="Remove"
+                        submitVariant="destructive"
+                      >
+                        <input type="hidden" name="id" value={row.id} />
+                      </FoundationForm>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>
